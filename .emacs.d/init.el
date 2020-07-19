@@ -120,21 +120,6 @@
   (global-undo-tree-mode)
   (setq undo-tree-visualizer-diff t))
 
-(use-package rust-mode)
+;; programming languages
 
-;; (use-package god-mode
-;;   :bind (("<escape>" . god-mode-all)
-;;          (:map god-local-mode-map ("." . repeat)))
-;;   :hook ((god-mode-enabled
-;;           god-mode-disabled
-;;           buffer-list-update) . my-god-mode-update-cursor)
-;;   :demand
-;;   :config
-;;   (god-mode)
-;;   (defun my-god-mode-update-cursor ()
-;;     (setq cursor-type (if (or god-local-mode buffer-read-only)
-;;                           'box
-;;                         'bar
-;;                         )))
-;;   (setq god-exempt-major-modes nil)
-;;   (setq god-exempt-predicates nil))
+(use-package rust-mode)
