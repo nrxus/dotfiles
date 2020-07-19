@@ -113,7 +113,7 @@
 
 ;; parens
 (use-package smartparens
-  :hook ((prog-mode . turn-on-smartparens-strict-mode))
+  :hook ((prog-mode . turn-on-smartparens-mode))
   :config
   (require 'smartparens-config)
   (progn (show-smartparens-global-mode t))
@@ -129,7 +129,9 @@
 ;; expand selection
 (use-package expand-region)
 
-;; generic programming
+(use-package git-timemachine)
+
+;; -------------------------------- generic programming --------------------------------
 
 ;; lsp
 (use-package eglot
@@ -143,7 +145,7 @@
   :config (yas-global-mode t)
   :diminish)
 
-;; programming languages
+;; -------------------------------- programming languags --------------------------------
 
 (use-package rust-mode
   :hook
