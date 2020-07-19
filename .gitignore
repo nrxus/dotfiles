@@ -1,0 +1,8 @@
+.emacs.d/elpa/
+.emacs.d/recentf
+.emacs.d/auto-save-list/
+.emacs.d/transient/
+.emacs.d/custom-file.el
+.emacs.d/projectile.cache
+.emacs.d/projectile-bookmarks.eld
+.emacs.d/eshell/
