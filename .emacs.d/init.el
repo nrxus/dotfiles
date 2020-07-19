@@ -77,26 +77,29 @@
 (use-package magit
   :bind ("C-x g" . magit-status))
 
-(use-package diff-hl
-  :hook
-  (dired-mode diff-hl-dired-mode)
-  (magit-post-refresh diff-hl-magit-post-refresh)
-  (magit-pre-refresh diff-hl-magit-pre-refresh)
-  :config (global-diff-hl-mode t))
+(use-package diff-hl)
+(global-diff-hl-mode)
+(add-hook 'dired-mode-hook 'diff-hl-dired-mode)
+(add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
+(add-hook 'magit-pre-refresh-hook 'diff-hl-magit-pre-refresh)
 
+;; search
 (use-package ivy
   :config
   (ivy-mode)
   (setq ivy-use-virtual-buffers t)
-  (setq ivy-count-format "(%d/%d) "))
+  (setq ivy-count-format "(%d/%d) ")
+  :diminish)
 
 (use-package counsel
   :config (counsel-mode)
-  :bind ("C-c s" ))
+  :bind ("C-c s")
+  :diminish)
 
 (use-package swiper
   :bind ("C-s" . swiper-isearch))
 
+;; project
 (use-package projectile
   :init
   (setq projectile-completion-system 'ivy)
@@ -108,6 +111,7 @@
 (use-package counsel-projectile
   :config (counsel-projectile-mode))
 
+;; parens
 (use-package smartparens
   :hook ((prog-mode . turn-on-smartparens-strict-mode))
   :config
@@ -115,11 +119,40 @@
   (progn (show-smartparens-global-mode t))
   :diminish smartparens-mode)
 
+;; undo/redo history
 (use-package undo-tree
   :config
   (global-undo-tree-mode)
-  (setq undo-tree-visualizer-diff t))
+  (setq undo-tree-visualizer-diff t)
+  :diminish)
+
+;; expand selection
+(use-package expand-region)
+
+;; generic programming
+
+;; lsp
+(use-package eglot
+  :config (add-to-list 'eglot-server-programs '(rust-mode . ("rust-analyzer"))))
+
+;; autocomplete
+(use-package company)
+
+;; snippets for autocomplete
+(use-package yasnippet
+  :config (yas-global-mode t)
+  :diminish)
 
 ;; programming languages
 
-(use-package rust-mode)
+(use-package rust-mode
+  :hook
+  (rust-mode . eglot-ensure)
+  (rust-mode . company-mode))
+
+(use-package markdown-mode
+  :ensure t
+  :mode (("README\\.md\\'" . gfm-mode)
+         ("\\.md\\'" . markdown-mode)
+         ("\\.markdown\\'" . markdown-mode))
+  :init (setq markdown-command "multimarkdown"))
