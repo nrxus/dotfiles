@@ -139,6 +139,18 @@
 ;; expand selection
 (use-package expand-region)
 
+;; useful commands
+(use-package crux
+  :bind (
+         ([remap move-beginning-of-line] . crux-move-beginning-of-line)
+         ("<S-return>" . crux-smart-open-line)
+         ("<C-S-return>" . crux-smart-open-line-above)
+         ("C-k" . crux-kill-and-join-forward)
+         ("<C-S-backspace>" . crux-kill-whole-line)
+         ("C-S-k" . crux-kill-line-backwards)
+         ("C-c d" . crux-duplicate-current-line-or-region))
+  :demand)
+
 ;; -------------------------------- generic programming --------------------------------
 
 ;; lsp

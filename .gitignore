@@ -8,3 +8,4 @@
 .emacs.d/eshell/
 /.emacs.d/.cask/
 /.emacs.d/projects
+/.emacs.d/smex-items
