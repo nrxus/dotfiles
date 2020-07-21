@@ -82,11 +82,15 @@
 (use-package magit
   :bind ("C-x g" . magit-status))
 
+;; diff in the fringe
 (use-package diff-hl)
 (global-diff-hl-mode)
 (add-hook 'dired-mode-hook 'diff-hl-dired-mode)
 (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
 (add-hook 'magit-pre-refresh-hook 'diff-hl-magit-pre-refresh)
+
+;; go back and forth in commits
+(use-package git-timemachine)
 
 ;; search
 (use-package ivy
@@ -134,8 +138,6 @@
 
 ;; expand selection
 (use-package expand-region)
-
-(use-package git-timemachine)
 
 ;; -------------------------------- generic programming --------------------------------
 
