@@ -48,6 +48,11 @@
 ;; better buffer
 (global-set-key (kbd "C-x C-b") 'ibuffer)
 
+(add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
+(defun colorize-compilation-buffer ()
+  (ansi-color-apply-on-region compilation-filter-start (point-max)))
+(add-hook 'compilation-filter-hook 'colorize-compilation-buffer)
+
 ;; --------------------------- preparing packages ---------------------------
 ;; prepare MELPA package
 (require 'package)
@@ -114,6 +119,7 @@
 ;; parens
 (use-package smartparens
   :hook ((prog-mode . turn-on-smartparens-mode))
+  :hook ((conf-mode . turn-on-smartparens-mode))
   :config
   (require 'smartparens-config)
   (progn (show-smartparens-global-mode t))
