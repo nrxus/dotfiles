@@ -98,11 +98,12 @@
   (ivy-mode)
   (setq ivy-use-virtual-buffers t)
   (setq ivy-count-format "(%d/%d) ")
-  (setq ivy-initial-inputs-alist nil)
   :diminish)
 
 (use-package counsel
-  :config (counsel-mode)
+  :config
+  (counsel-mode)
+  (setq ivy-initial-inputs-alist nil)
   :bind ("C-c s")
   :diminish)
 
