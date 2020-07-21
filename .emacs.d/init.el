@@ -76,7 +76,7 @@
 
 ;; window switching
 (use-package ace-window
-  :bind* ("M-o" . ace-window))
+  :bind ("M-o" . ace-window))
 
 ;; git
 (use-package magit
@@ -98,6 +98,7 @@
   (ivy-mode)
   (setq ivy-use-virtual-buffers t)
   (setq ivy-count-format "(%d/%d) ")
+  (setq ivy-initial-inputs-alist nil)
   :diminish)
 
 (use-package counsel
@@ -107,6 +108,8 @@
 
 (use-package swiper
   :bind ("C-s" . swiper-isearch))
+
+(use-package smex)
 
 ;; project
 (use-package projectile
@@ -158,7 +161,11 @@
   :config (add-to-list 'eglot-server-programs '(rust-mode . ("rust-analyzer"))))
 
 ;; autocomplete
-(use-package company)
+(use-package company
+  :hook (emacs-lisp-mode . company-mode)
+  :bind ("<C-tab>" . company-complete)
+  :diminish
+  :ensure)
 
 ;; snippets for autocomplete
 (use-package yasnippet
