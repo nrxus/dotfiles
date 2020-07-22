@@ -121,11 +121,37 @@
   (setq projectile-completion-system 'ivy)
   :config
   (projectile-global-mode t)
-  :config (define-key projectile-mode-map (kbd "C-c C-p") 'projectile-command-map)
+  ;; :config (define-key projectile-mode-map (kbd "C-c C-p") 'projectile-command-map)
   :diminish nil)
 
 (use-package counsel-projectile
   :config (counsel-projectile-mode))
+
+(defhydra hydra-projectile (:color teal
+                            :hint nil)
+  "
+     PROJECTILE: %(projectile-project-root)
+
+ ^ ^ Find File        S^ea^rch      ^ ^    Buffers
+-^-^-------------------^--^---------^-^-------------------
+ _F_ile               _sr_: rg         _i_buffer
+_ff_ile dwim        ^  ^               _b_uffer
+_fd_: file curr dir
+ _d_: dir
+
+"
+  ("sr"  counsel-projectile-rg)
+  ("b"   counsel-projectile-switch-to-buffer)
+  ("d"   counsel-projectile-find-dir)
+  ("F"   counsel-projectile-find-file)
+  ("ff"  counsel-projectile-find-file-dwim)
+  ("fd"  projectile-find-file-in-directory)
+  ("i"   projectile-ibuffer)
+  ("p"   counsel-projectile-switch-project "switch project")
+  ("c"   projectile-invalidate-cache "invalidate cache")
+  ("q"   nil "cancel" :color blue))
+
+(global-set-key (kbd "C-c C-p") #'hydra-projectile/body)
 
 ;; parens
 (use-package smartparens
