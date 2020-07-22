@@ -77,6 +77,13 @@
 ;; hide minor modes
 (use-package diminish)
 
+;; allows me to create mini modes
+(use-package hydra)
+
+;; bind two quick subsequent presses to a function
+(use-package key-chord
+  :config (key-chord-mode 1))
+
 ;; window switching
 (use-package ace-window
   :bind ("M-o" . ace-window))
@@ -133,24 +140,28 @@
   "
      PROJECTILE: %(projectile-project-root)
 
- ^ ^ Find File        S^ea^rch      ^ ^    Buffers
--^-^-------------------^--^---------^-^-------------------
- _F_ile               _sr_: rg         _i_buffer
-_ff_ile dwim        ^  ^               _b_uffer
-_fd_: file curr dir
- _d_: dir
-
+^ ^        Open            ^ ^   Run      ^ ^ Other Projects
+^-----^--------------------^-^--------------------------------
+_<SPC>_: within project    _P_: test      _p_: switch
+    _g_: file at point    _sr_: search    _F_: find anywhere
+    _T_: find test         _c_: compile
+    _b_: buffer
+    _d_: directory
+    _t_: test/impl
 "
-  ("sr"  counsel-projectile-rg)
-  ("b"   counsel-projectile-switch-to-buffer)
-  ("d"   counsel-projectile-find-dir)
-  ("F"   counsel-projectile-find-file)
-  ("ff"  counsel-projectile-find-file-dwim)
-  ("fd"  projectile-find-file-in-directory)
-  ("i"   projectile-ibuffer)
-  ("p"   counsel-projectile-switch-project "switch project")
-  ("c"   projectile-invalidate-cache "invalidate cache")
-  ("q"   nil "cancel" :color blue))
+  ("<SPC>" counsel-projectile)
+  ("F"     projectile-find-file-in-known-projects)
+  ("P"     projectile-test-project)
+  ("T"     projectile-find-test-file)
+  ("b"     counsel-projectile-switch-to-buffer)
+  ("c"     projectile-compile-project)
+  ("d"     counsel-projectile-find-dir)
+  ("g"     counsel-projectile-find-file-dwim)
+  ("i"     projectile-invalidate-cache "invalidate cache")
+  ("p"     counsel-projectile-switch-project)
+  ("sr"    counsel-projectile-rg)
+  ("t"     projectile-toggle-between-implementation-and-test)
+  ("q"     nil "cancel" :color blue))
 
 (global-set-key (kbd "C-c C-p") #'hydra-projectile/body)
 
@@ -193,12 +204,6 @@ _fd_: file curr dir
 
 ;; easily transpose lines
 (use-package move-text)
-
-;; allow to create cool keychords
-(use-package hydra)
-
-(use-package key-chord
-  :config (key-chord-mode 1))
 
 ;; move text
 (defhydra hydra-move-text ()
