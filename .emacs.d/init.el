@@ -53,6 +53,9 @@
   (ansi-color-apply-on-region compilation-filter-start (point-max)))
 (add-hook 'compilation-filter-hook 'colorize-compilation-buffer)
 
+;; enable hide-show when programming
+(add-hook 'prog-mode-hook 'hs-minor-mode)
+
 ;; --------------------------- preparing packages ---------------------------
 ;; prepare MELPA package
 (require 'package)
@@ -154,6 +157,51 @@
          ("C-S-k" . crux-kill-line-backwards)
          ("C-c d" . crux-duplicate-current-line-or-region))
   :demand)
+
+;; org-mode
+(use-package org)
+
+;; easily transpose lines
+(use-package move-text)
+
+;; allow to create cool keychords
+(use-package hydra)
+
+(use-package key-chord
+  :config (key-chord-mode 1))
+
+;; move text
+(defhydra hydra-move-text ()
+  "Move text"
+  ("u" move-text-up "up")
+  ("d" move-text-down "down"))
+
+(global-set-key (kbd "C-S-u") #'hydra-move-text/move-text-up)
+(global-set-key (kbd "C-S-d") #'hydra-move-text/move-text-down)
+
+;; hide show
+(defhydra hydra-hs (global-map "C-c @")
+  "
+Hide^^            ^Show^            ^Toggle^    ^Navigation^
+----------------------------------------------------------------
+_h_ hide all      _s_ show all      _t_oggle    _n_ext line
+_d_ hide block    _a_ show block              _p_revious line
+_l_ hide level
+
+_SPC_ cancel
+"
+  ("s" hs-show-all)
+  ("h" hs-hide-all)
+  ("a" hs-show-block)
+  ("d" hs-hide-block)
+  ("t" hs-toggle-hiding)
+  ("l" hs-hide-level)
+  ("n" forward-line)
+  ("p" (forward-line -1))
+  ("SPC" nil)
+  )
+
+(key-chord-define-global "hh" 'hydra-hs/body)
 
 ;; -------------------------------- generic programming --------------------------------
 
