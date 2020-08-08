@@ -5,6 +5,7 @@
       '(
         counsel-M-x
         crux-move-beginning-of-line
+        forward-sentence
         ))
 
 (setq mc/cmds-to-run-once

@@ -298,4 +298,8 @@ _SPC_ cancel
   :mode (("README\\.md\\'" . gfm-mode)
          ("\\.md\\'" . markdown-mode)
          ("\\.markdown\\'" . markdown-mode))
-  :init (setq markdown-command "multimarkdown"))
+  :init (setq markdown-command "multimarkdown")
+  :config (unbind-key "C-c C-p" markdown-mode-map))
+
+(use-package dtrt-indent
+  :hook (prog-mode . dtrt-indent-mode))
