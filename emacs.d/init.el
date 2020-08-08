@@ -37,6 +37,10 @@
 ;; Do not put 'customize' config in init.el; give it another file.
 (setq custom-file "~/.emacs.d/custom-file.el")
 
+; put backups somewhere else
+(setq backup-directory-alist `((".*" . ,temporary-file-directory)))
+(setq auto-save-file-name-transforms `((".*" ,temporary-file-directory t)))
+
 ;; save recent files
 (recentf-mode 1)
 (setq recentf-max-menu-items 25)
