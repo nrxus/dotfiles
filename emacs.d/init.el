@@ -306,7 +306,10 @@ _SPC_ cancel
 (use-package flycheck
   :diminish)
 
-;; -------------------------------- programming languags --------------------------------
+(use-package eldoc
+  :diminish)
+
+;; -------------------------------- programming languages --------------------------------
 
 ;; rust
 (use-package rust-mode
@@ -342,4 +345,3 @@ _SPC_ cancel
 
 ;; diminish workarounds
 (add-hook 'hs-minor-mode-hook (lambda () (diminish 'hs-minor-mode)))
-(diminish 'eldoc-mode)
