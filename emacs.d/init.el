@@ -26,6 +26,13 @@
 ;; update buffer if files changed in disk
 (global-auto-revert-mode t)
 
+;; force revert
+(defun revert-buffer-no-confirm ()
+  "Revert buffer without confirmation."
+  (interactive) (revert-buffer t t))
+
+(global-set-key (kbd "s-u") 'revert-buffer-no-confirm)
+
 ;; ------------------------------ x clipboard ------------------------------
 ;; put x clipboard into the kill ring before replacing it
 (setq-default save-interprogram-paste-before-kill t)
@@ -288,15 +295,26 @@ _SPC_ cancel
 ;; snippets for autocomplete
 (use-package yasnippet
   :config (yas-global-mode t)
+  :diminish yas-minor-mode)
+
+;; guess indentation
+(use-package dtrt-indent
+  :hook (prog-mode . dtrt-indent-mode)
+  :diminish)
+
+;; flymake alternative
+(use-package flycheck
   :diminish)
 
 ;; -------------------------------- programming languags --------------------------------
 
+;; rust
 (use-package rust-mode
   :hook
   (rust-mode . eglot-ensure)
   (rust-mode . company-mode))
 
+;; markdown
 (use-package markdown-mode
   :ensure t
   :mode (("README\\.md\\'" . gfm-mode)
@@ -305,5 +323,23 @@ _SPC_ cancel
   :init (setq markdown-command "multimarkdown")
   :config (unbind-key "C-c C-p" markdown-mode-map))
 
-(use-package dtrt-indent
-  :hook (prog-mode . dtrt-indent-mode))
+;; javascript
+(use-package js2-mode
+  :mode (("\\.js\\'" . js2-mode)))
+
+;; typescript
+(use-package typescript-mode)
+(use-package tide
+  :after (typescript-mode company flycheck)
+  :hook ((typescript-mode . tide-setup)
+         (typescript-mode . tide-hl-identifier-mode)
+         (typescript-mode . flycheck-mode)
+         (typescript-mode . company-mode)
+         (before-save . tide-format-before-save))
+  ; replacement for x-ref-find-references in tide
+  :config (define-key tide-mode-map (kbd "M-?") 'tide-references)
+  :diminish)
+
+;; diminish workarounds
+(add-hook 'hs-minor-mode-hook (lambda () (diminish 'hs-minor-mode)))
+(diminish 'eldoc-mode)
