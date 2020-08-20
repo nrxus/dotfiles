@@ -67,6 +67,15 @@
 ;; enable hide-show when programming
 (add-hook 'prog-mode-hook 'hs-minor-mode)
 
+;; kill buffer other in other window
+(defun kill-other-buffer ()
+  "Kill the buffer in the other window."
+  (interactive)
+  (kill-buffer (window-buffer (other-window 1)))
+  (other-window 1))
+
+(define-key ctl-x-4-map (kbd "k") 'kill-other-buffer)
+
 ;; --------------------------- preparing packages ---------------------------
 ;; prepare MELPA package
 (require 'package)
@@ -326,21 +335,73 @@ _SPC_ cancel
   :init (setq markdown-command "multimarkdown")
   :config (unbind-key "C-c C-p" markdown-mode-map))
 
+;; node-modules
+(use-package add-node-modules-path)
+
+;; prettier
+(use-package prettier-js)
+
 ;; javascript
 (use-package js2-mode
-  :mode (("\\.js\\'" . js2-mode)))
+  :mode "\\.js\\'")
+
+(use-package rjsx-mode)
 
 ;; typescript
 (use-package typescript-mode)
+
+;; tsx
+(use-package web-mode
+  :mode "\\.tsx\\'"
+  :config
+  ((flycheck-add-mode 'javascript-eslint 'web-mode)))
+
+(defun setup-prettier ()
+  (interactive)
+  (add-node-modules-path)
+  (prettier-js-mode))
+
+(eval-after-load 'js2-mode
+  '(add-hook 'js2-mode-hook 'setup-prettier))
+
+(eval-after-load 'typescript-mode
+  '(add-hook 'typescript-mode-hook 'setup-prettier))
+
+(eval-after-load 'web-mode
+  '(add-hook 'web-mode-hook 'setup-prettier))
+
+(defun remove-conflicting-tide-format()
+  "removes tide formatter when prettier-js-mode is enabled"
+  (if prettier-js-mode
+      (remove-hook 'before-save-hook 'tide-format-before-save)
+    (when tide-mode
+      (add-hook 'before-save-hook 'tide-format-before-save))))
+
+(eval-after-load 'prettier-js
+  '(add-hook 'prettier-js-mode-hook 'remove-conflicting-tide-format))
+
+;; tsserver
 (use-package tide
+  :init
+  (defun setup-tide-mode ()
+    (interactive)
+    (tide-setup)
+    (tide-hl-identifier-mode)
+    (flycheck-mode)
+    (company-mode))
+  (defun setup-tsx-mode ()
+    (when (string-equal "tsx" (file-name-extension buffer-file-name))
+      (setup-tide-mode)))
   :after (typescript-mode company flycheck)
-  :hook ((typescript-mode . tide-setup)
-         (typescript-mode . tide-hl-identifier-mode)
-         (typescript-mode . flycheck-mode)
-         (typescript-mode . company-mode)
+  :hook ((typescript-mode . setup-tide-mode)
+         (js2-mode . setup-tide-mode)
+         (web-mode . setup-tsx-mode)
          (before-save . tide-format-before-save))
   ; replacement for x-ref-find-references in tide
-  :config (define-key tide-mode-map (kbd "M-?") 'tide-references)
+  :config
+  (define-key tide-mode-map (kbd "M-?") 'tide-references)
+  (flycheck-add-next-checker 'javascript-eslint 'javascript-tide 'append)
+  (flycheck-add-next-checker 'typescript-tide 'javascript-eslint 'append)
   :diminish)
 
 ;; diminish workarounds
