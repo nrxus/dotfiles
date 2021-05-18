@@ -5,7 +5,12 @@
       '(
         counsel-M-x
         crux-move-beginning-of-line
+        electric-newline-and-maybe-indent
         forward-sentence
+        indent-for-tab-command
+        kill-region
+        org-yank
+        yaml-electric-backspace
         ))
 
 (setq mc/cmds-to-run-once

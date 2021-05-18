@@ -9,3 +9,8 @@
 /emacs.d/.cask/
 /emacs.d/projects
 /emacs.d/smex-items
+/emacs.d/.cache
+/emacs.d/tramp
+/emacs.d/.lsp-session-v1
+/emacs.d/emojis
+**.elc
