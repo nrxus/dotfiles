@@ -12,6 +12,7 @@
 
 ;; no more tutorial
 (setq inhibit-startup-message t)
+(global-unset-key (kbd "<menu>"))
 
 ;; ----------------------------- editor tweaks -----------------------------
 ;; newline at the end by default
@@ -44,7 +45,7 @@
 ;; Do not put 'customize' config in init.el; give it another file.
 (setq custom-file "~/.emacs.d/custom-file.el")
 
-; put backups somewhere else
+;; put backups somewhere else
 (setq backup-directory-alist `((".*" . ,temporary-file-directory)))
 (setq auto-save-file-name-transforms `((".*" ,temporary-file-directory t)))
 
@@ -75,6 +76,9 @@
   (other-window 1))
 
 (define-key ctl-x-4-map (kbd "k") 'kill-other-buffer)
+
+(eval-after-load "conf-mode"
+  '(progn (define-key conf-toml-mode-map (kbd "C-c C-p") nil)))
 
 ;; --------------------------- preparing packages ---------------------------
 ;; prepare MELPA package
@@ -111,6 +115,8 @@
 ;; git
 (use-package magit
   :bind ("C-x g" . magit-status))
+
+(setq-default mode-line-format (delete '(vc-mode vc-mode) mode-line-format))
 
 ;; diff in the fringe
 (use-package diff-hl)
@@ -155,24 +161,44 @@
 (use-package counsel-projectile
   :config (counsel-projectile-mode))
 
+(defun projectile-test-project (arg)
+  "Run project test command.
+
+Normally you'll be prompted for a compilation command, unless
+variable `compilation-read-command'.  You can force the prompt
+with a prefix ARG."
+  (interactive "P")
+  (let ((command (projectile-test-command (projectile-compilation-dir))))
+    (projectile--run-project-cmd command projectile-test-cmd-map
+                                 :show-prompt arg
+                                 :prompt-prefix "Test command: "
+                                 :save-buffers t)))
+
+(defun projectile-test-file ()
+  "Runs the projectile test command for the file in the current window"
+  (interactive)
+  (let ((command (projectile-test-command (projectile-compilation-dir)))
+        (file (file-relative-name buffer-file-name (projectile-project-root))))
+    (projectile-run-compilation (concat command " " file))))
+
 (defhydra hydra-projectile (:color teal
-                            :hint nil)
+                                   :hint nil)
   "
      PROJECTILE: %(projectile-project-root)
 
 ^ ^        Open            ^ ^   Run      ^ ^ Other Projects
 ^-----^--------------------^-^--------------------------------
-_<SPC>_: within project    _P_: test      _p_: switch
-    _g_: file at point    _sr_: search    _F_: find anywhere
-    _T_: find test         _c_: compile
-    _b_: buffer
-    _d_: directory
+_<SPC>_: within project   _T_: test file      _p_: switch
+    _g_: file at point   _sr_: search         _F_: find anywhere
+    _b_: buffer           _c_: compile
+    _d_: directory        _P_: test project
     _t_: test/impl
+
 "
   ("<SPC>" counsel-projectile)
   ("F"     projectile-find-file-in-known-projects)
   ("P"     projectile-test-project)
-  ("T"     projectile-find-test-file)
+  ("T"     projectile-test-file)
   ("b"     counsel-projectile-switch-to-buffer)
   ("c"     projectile-compile-project)
   ("d"     counsel-projectile-find-dir)
@@ -288,22 +314,68 @@ _SPC_ cancel
 
 (key-chord-define-global "mc" 'hydra-multiple-cursors/body)
 
+(use-package emojify :hook (after-init . global-emojify-mode))
+
 ;; -------------------------------- generic programming --------------------------------
 
 ;; lsp
-(use-package eglot
-  :config (add-to-list 'eglot-server-programs '(rust-mode . ("rust-analyzer"))))
+;; (use-package eglot
+;; :config (add-to-list 'eglot-server-programs '(rust-mode . ("rust-analyzer"))))
+
+;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
+(setq lsp-keymap-prefix "C-l")
+
+(use-package lsp-mode
+  :commands lsp
+  :custom
+  ;; what to use when checking on-save. "check" is default, I prefer clippy
+  (lsp-rust-analyzer-cargo-watch-command "clippy")
+  (lsp-eldoc-render-all t)
+  (lsp-idle-delay 0.6)
+  :config
+  (setq lsp-modeline-code-actions-segments '(count name icon))
+  (setq lsp-headerline-breadcrumb-enable nil)
+  :diminish)
+
+;; (use-package lsp-ui
+;; :commands lsp-ui-mode
+;; :custom
+;; (lsp-ui-sideline-enable nil)
+;; (lsp-ui-peek-always-show t)
+;; (lsp-ui-sideline-show-hover t)
+;; (lsp-ui-doc-enable nil))
+
+(setq lsp-rust-analyzer-proc-macro-enable t)
+(setq lsp-rust-analyzer-cargo-load-out-dirs-from-check t)
+
+(use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
+
+(use-package which-key
+  :config
+  (which-key-mode)
+  :diminish)
 
 ;; autocomplete
 (use-package company
+  :ensure
+  :custom
+  (company-idle-delay 0.5) ;; how long to wait until popup
+  ;; (company-begin-commands nil) ;; uncomment to disable popup
   :hook (emacs-lisp-mode . company-mode)
-  :bind ("<C-tab>" . company-complete)
-  :diminish
-  :ensure)
+  :bind (("<C-tab>" . company-complete)
+         :map company-active-map
+	 ("C-n" . company-select-next)
+	 ("C-p" . company-select-previous)
+	 ("M-<" . company-select-first)
+	 ("M->" . company-select-last))
+  :diminish)
 
 ;; snippets for autocomplete
 (use-package yasnippet
-  :config (yas-global-mode t)
+  :config
+  (yas-reload-all)
+  (add-hook 'prog-mode-hook 'yas-minor-mode)
+  (add-hook 'text-mode-hook 'yas-minor-mode)
   :diminish yas-minor-mode)
 
 ;; guess indentation
@@ -318,22 +390,48 @@ _SPC_ cancel
 (use-package eldoc
   :diminish)
 
+;; (setq eldoc-echo-area-display-truncation-message nil)
+;; (setq eldoc-echo-area-use-multiline-p 3)
+
+(use-package all-the-icons)
+
 ;; -------------------------------- programming languages --------------------------------
 
-;; rust
-(use-package rust-mode
-  :hook
-  (rust-mode . eglot-ensure)
-  (rust-mode . company-mode))
+(use-package rustic
+  :bind (:map rustic-mode-map
+              ("M-j" . lsp-ui-imenu)
+              ("M-?" . lsp-find-references)
+              ("C-c C-c l" . flycheck-list-errors)
+              ("C-c C-c a" . lsp-execute-code-action)
+              ("C-c C-c r" . lsp-rename)
+              ("C-c C-c q" . lsp-workspace-restart)
+              ("C-c C-c Q" . lsp-workspace-shutdown)
+              ("C-c C-c s" . lsp-rust-analyzer-status))
+  :config
+  ;; uncomment for less flashiness
+  ;; (setq lsp-eldoc-hook nil)
+  ;; (setq lsp-enable-symbol-highlighting nil)
+  (setq lsp-signature-auto-activate nil)
+
+  ;; comment to disable rustfmt on save
+  (add-hook 'rustic-mode-hook 'rk/rustic-mode-hook))
+
+(eval-after-load "rustic"
+  '(progn (define-key rustic-mode-map (kbd "C-c C-p") nil)))
+
+(defun rk/rustic-mode-hook ()
+  ;; so that run C-c C-c C-r works without having to confirm
+  (setq-local buffer-save-without-query t))
 
 ;; markdown
 (use-package markdown-mode
-  :ensure t
   :mode (("README\\.md\\'" . gfm-mode)
          ("\\.md\\'" . markdown-mode)
          ("\\.markdown\\'" . markdown-mode))
   :init (setq markdown-command "multimarkdown")
   :config (unbind-key "C-c C-p" markdown-mode-map))
+
+(use-package yaml-mode)
 
 ;; node-modules
 (use-package add-node-modules-path)
@@ -397,12 +495,33 @@ _SPC_ cancel
          (js2-mode . setup-tide-mode)
          (web-mode . setup-tsx-mode)
          (before-save . tide-format-before-save))
-  ; replacement for x-ref-find-references in tide
+  ;; replacement for x-ref-find-references in tide
   :config
-  (define-key tide-mode-map (kbd "M-?") 'tide-references)
+  ;; (define-key tide-mode-map (kbd "M-?") 'tide-references)
   (flycheck-add-next-checker 'javascript-eslint 'javascript-tide 'append)
   (flycheck-add-next-checker 'typescript-tide 'javascript-eslint 'append)
   :diminish)
 
 ;; diminish workarounds
 (add-hook 'hs-minor-mode-hook (lambda () (diminish 'hs-minor-mode)))
+
+;; org mode
+
+(use-package org-present)
+
+;; (push "~/workspace/ob-rust/" load-path)
+;; (require 'ob-rust)
+
+(add-hook 'org-present-mode-hook
+          (lambda ()
+            (org-present-big)
+            (org-display-inline-images)
+            (org-present-hide-cursor)
+            (org-present-read-only)))
+
+(add-hook 'org-present-mode-quit-hook
+          (lambda ()
+            (org-present-small)
+            (org-remove-inline-images)
+            (org-present-show-cursor)
+            (org-present-read-write)))
