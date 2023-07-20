@@ -211,6 +211,22 @@ _<SPC>_: within project   _T_: test file      _p_: switch
 
 (global-set-key (kbd "C-c C-p") #'hydra-projectile/body)
 
+(defvar my/keys-keymap (make-keymap)
+  "Keymap for my/keys-mode")
+
+(define-minor-mode my/keys-mode
+  "Minor mode for my personal keybindings."
+  :init-value t
+  :global t
+  :keymap my/keys-keymap)
+
+;; The keymaps in `emulation-mode-map-alists' take precedence over
+;; `minor-mode-map-alist'
+(add-to-list 'emulation-mode-map-alists
+             `((my/keys-mode . ,my/keys-keymap)))
+
+(define-key my/keys-keymap (kbd "C-c C-p") 'hydra-projectile/body)
+
 ;; parens
 (use-package smartparens
   :hook ((prog-mode . turn-on-smartparens-mode))
@@ -316,6 +332,8 @@ _SPC_ cancel
 
 (use-package emojify :hook (after-init . global-emojify-mode))
 
+(use-package vterm)
+
 ;; -------------------------------- generic programming --------------------------------
 
 ;; lsp
@@ -349,6 +367,7 @@ _SPC_ cancel
 (setq lsp-rust-analyzer-cargo-load-out-dirs-from-check t)
 
 (use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
+(use-package lsp-treemacs :commands lsp-ivy-workspace-symbol)
 
 (use-package which-key
   :config
